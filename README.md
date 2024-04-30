@@ -1,1 +1,2 @@
-# SpringBoot 실습 -  게시판
+# SpringBoot_board
+스프링부트 게시판 실습
