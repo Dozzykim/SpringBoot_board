@@ -1,5 +1,6 @@
 package com.dohee.board.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.dohee.board.dto.Board;
 import com.dohee.board.dto.Files;
+import com.dohee.board.dto.Option;
+import com.dohee.board.dto.Page;
 import com.dohee.board.service.BoardService;
 import com.dohee.board.service.FileService;
 
@@ -57,14 +60,35 @@ public class BoardController {
      * @return
      * @throws Exception
      */
-    @GetMapping("/list")
-    public String list(Model model) throws Exception {
+    @GetMapping("/list") // 스프링은 넘어오는 파라미터가 없을 때, 기본생성자로 만들어서 가져와줌.
+    public String list(Model model, Page page
+                    //@RequestParam(value = "keyword", defaultValue = "") String keyword
+                    , Option option) throws Exception {
 
         // 데이터 요청
-        List<Board> boardList = boardService.list();
+        //List<Board> boardList = boardService.list(page);
+        //List<Board> boardList = boardService.search(keyword);
+        //List<Board> boardList = boardService.search(option);
+        List<Board> boardList = boardService.list(page, option);
+
+        // 페이징
+        log.info("page: " + page);
+        // 검색
+        log.info("option: " + option);
         
         // 모델 등록
         model.addAttribute("boardList", boardList);
+        model.addAttribute("page", page);
+
+        // 동적으로 옵션값을 가져오는 경우
+        // List<Option> options = new ArrayList<Option>();
+        // options.add(new Option("전체", 0));
+        // options.add(new Option("제목", 1));
+        // options.add(new Option("내용", 2));
+        // options.add(new Option("제목+내용", 3));
+        // options.add(new Option("작성자", 4));
+        
+        // model.addAttribute("options", options);
 
         // 뷰 페이지 지정
         return "/board/list";    // resources/templates/board/list.html
@@ -83,6 +107,9 @@ public class BoardController {
 
         // 데이터 요청
         Board board = boardService.select(no);
+
+        // 조회수 증가
+        int views = boardService.updateViews(board);
         
         // 파일 목록 요청
         // Board라는 곳의 게시글번호가 no인 파일들을 가져옴 
@@ -93,6 +120,7 @@ public class BoardController {
         // 모델 등록
         model.addAttribute("board", board);
         model.addAttribute("fileList", fileList);
+
 
         // 뷰 페이지 지정
         return "/board/read";

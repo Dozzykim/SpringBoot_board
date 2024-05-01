@@ -8,6 +8,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.dohee.board.dto.Board;
 import com.dohee.board.dto.Files;
+import com.dohee.board.dto.Option;
+import com.dohee.board.dto.Page;
 import com.dohee.board.mapper.BoardMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -26,9 +28,13 @@ public class BoardServiceImpl implements BoardService {
      * 게시글 전체 조회
      */
     @Override
-    public List<Board> list() throws Exception {
+    public List<Board> list(Page page, Option option) throws Exception {
 
-        List<Board> boardList = boardMapper.list();
+        // 전체 게시글 개수 조회 및 세팅
+        int total = boardMapper.count(option);
+        page.setTotal(total);
+        
+        List<Board> boardList = boardMapper.list(page, option);
 
         return boardList;
     }
@@ -42,6 +48,7 @@ public class BoardServiceImpl implements BoardService {
     public Board select(int no) throws Exception {
 
         Board board = boardMapper.select(no);
+        // boardMapper.updateViews(board);
 
         return board;
     }
@@ -122,6 +129,19 @@ public class BoardServiceImpl implements BoardService {
         int result = boardMapper.delete(no);
 
         return result;
+    }
+
+    @Override
+   // public List<Board> search(String keyword) throws Exception {
+    public List<Board> search(Option option) throws Exception {
+        List<Board> boardList = boardMapper.search(option);
+
+        return boardList;
+    }
+
+    @Override
+    public int updateViews(Board board) throws Exception {
+        return boardMapper.updateViews(board);
     }
 
 

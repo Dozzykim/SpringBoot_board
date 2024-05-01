@@ -1,0 +1,40 @@
+# 검색
+1. 게시글 목록 페이지 - 검색창 UI
+2. 검색을 위한 쿼리 수정
+    ```
+        SELECT *
+        FROM board
+        WHERE title LIKE '%keyword%'
+    ```
+3. 검색 옵션
+    - 전체          : 0
+    - 제목          : 1
+    - 내용          : 2
+    - 제목 + 내용   : 3
+    - 작성자        : 4
+
+    ✅ MyBatis 동적 쿼리
+    ```
+        SELECT *
+        FROM board
+        WHERE
+            <if test=" option.code == 0 ">
+                title LIKE CONCAT('%', #{keyword}, '%')
+                OR writer LIKE CONCAT('%', #{keyword}, '%')
+                OR content LIKE CONCAT('%', #{keyword}, '%');
+            </if>
+            <if test=" option.code == 1 ">
+                title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test=" option.code == 2 ">
+                writer LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test=" option.code == 3 ">
+                title LIKE CONCAT('%', #{keyword}, '%')
+                OR content LIKE CONCAT('%', #{keyword}, '%');
+            </if>
+            <if test=" option.code == 4 ">
+                writer LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+
+    ```
