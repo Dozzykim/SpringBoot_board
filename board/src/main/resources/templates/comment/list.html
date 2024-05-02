@@ -1,0 +1,19 @@
+
+
+<th:block th:each="cmmt : ${cmmtList}">
+    <div class="cmmt-box">
+        <div class="inner">
+            <div class="top">
+                <span class="cmmt-writer" th:text="${cmmt.writer}"></span>
+                <span class="cmmt-date" th:text="${cmmt.regDate}"></span>
+                <div class="item">
+                    <button class="btn-cmmt-update" th:data="${cmmt.cNo}">수정</button>
+                    <button class="btn-cmmt-delete" th:onclick="|deleteCmmt(${cmmt.cNo})|">삭제</button>
+                </div>
+            </div>
+            <p class="cmmt-content" th:text="${cmmt.content}"></p>
+            <button class="btn-reply-content">답글</button>
+        </div>
+    </div>
+</th:block>
+

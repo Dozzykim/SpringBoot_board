@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class Comment {
 
-    private int no;       // 댓글번호
+    private int cNo;       // 댓글번호
     private int boardNo;   // 종속되는 글번호
     private int parentNo;  // 부모댓글 번호
     private String writer;  // 작성자

@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>게시글 조회</title>
+    <style>
+        .cmmt-box .inner {
+            min-width: 500px;
+            max-width: 100px;
+            padding: 20px;
+            border: 1px solid black;
+        }
+
+        .cmmt-box .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
 </head>
 <body>
     <h1>게시글 조회</h1>
@@ -54,10 +68,33 @@
         </div>
     </form>
 
+    <!-- 댓글 입력 -->
+    <div id="reply-input">
+        <h3>댓글</h3>
+        <div class="reply-input">
+            <input type="text" name="writer" id="cmmt-writer" class="cmmt-writer" placeholder="작성자">
+            <br>
+            <textarea name="content" id="cmmt-content" cols="60" rows="5" placeholder="댓글을 작성해주세요."></textarea>
+            <div class="btn-box">
+                <button type="button" id="btn-cmmt-insert" class="btn-cmmt" onclick="insertCmmt()">등록</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 댓글 목록 -->
+    <div id="cmmt-list">
+
+    </div>
+
+
     <script>
 
         // 👩‍💻 모델 객체를 자바스크립트로 가져오는 방법
-        let no = "[[${board.no}]]"
+        let no = "[[${board.no}]]" // 글번호
+
+        // 댓글 목록 요청
+        cmmtList()
+        
 
         // 수정 화면 이동
         function moveUpdate() {
@@ -91,6 +128,246 @@
 
                     // 파일 항목 제거
                     element.parentNode.remove();
+                }
+            }
+        }
+
+        // 종속된 댓글 목록 조회
+        function cmmtList() {
+
+            // AJAX 비동기 요청
+            let request = new XMLHttpRequest();
+
+            // 요청 세팅
+            // request.open(요청메소드, URL)
+            request.open('GET', '/cmmt/' + no);
+            request.send();
+
+            request.onreadystatechange = function() {
+
+                // 요청 성공시,
+                if(request.readyState == request.DONE && request.status == 200) {
+                    // 댓글 목록 출력
+                    let response = request.responseText
+                    
+                    // ⭐서버에서 렌더링한 HTML로 갱신(SSR)
+                    let data = response; // (HTML)
+
+
+                    /*
+                    // ⭐JSON 데이터를 전달받아 HTML로 변환(CSR)
+                    let cmmtListData = JSON.parse(response); // JSON -> Array 배열로 변환
+                    console.log(response);
+                    
+                    let data = ``
+                    for(var i in cmmtListData) {
+                        data += `<div class="cmmt-box">`;
+                        data += `<div class="inner">`
+                        let writer = cmmtListData[i].writer;    // 작성자
+                        let content = cmmtListData[i].content;  // 댓글 내용
+                        let regDate = cmmtListData[i].regDate;  // 작성 일자
+
+                        data += `<div class="top">`
+                        data += `<span class="cmmt-writer">${writer}</span>`
+                        data += `<span class="cmmt-date">${regDate}</span>`
+
+                        data += `<div class="item">`
+                        data += `<button class="btn-cmmt-update">수정</button>`
+                        data += `<button class="btn-cmmt-delete">삭제</button>`
+                        data += `</div>`; // item div태그
+                        data += `</div>`; // top div태그
+
+                        data += `<p class="cmmt-content">${content}</p>`
+                        data += `<button class="btn-cmmt-answer">답글</button>`
+
+                        data += `</div>`; // inner div태그
+                        data += `</div>`; // cmmt-box div태그
+                    } */
+
+                    /*
+                    // for문을 다르게 써볼 수 있음
+
+                    for( let i=0; i<cmmtListData.length; i++ ) {
+                        let writer = cmmtListData[i].writer;
+                        let content = cmmtListData[i].content;
+                        let li = `<li>${content}</li>`
+                        data += li
+                    }
+                    */
+
+                    let cmmtList = document.getElementById('cmmt-list');
+                    cmmtList.innerHTML = data;
+
+                    // 댓글 수정버튼 이벤트 등록 
+                    event()
+                }
+            }
+        }
+
+        // 댓글 등록
+        function insertCmmt() {
+            let $writer = document.getElementById('cmmt-writer');
+            let $content = document.getElementById('cmmt-content');
+            let writer = $writer.value;
+            let content = $content.value;
+
+            let data = {
+                'boardNo': no,
+                'writer': writer,
+                'content' : content
+            }
+            // console.dir(data) //dir -> 객체로 묶여있는 애들을 로그로 볼 수 있음
+
+            let request = new XMLHttpRequest();
+
+            request.open('POST', '/cmmt');
+            request.setRequestHeader('content-Type', 'application/json')
+            request.send(JSON.stringify(data)) // JS의 Object(객체)형태를 java가 읽을 수 없어서, 문자열 형태로 변환해주어야함.
+
+            // 요청 상태 체킹
+            request.onreadystatechange = function() {
+
+                // 요청 성공시,
+                if(request.readyState == request.DONE && request.status == 201) {
+                    console.log('댓글 등록 성공!');
+
+                    // alert(request.responseText); // 응답메시지로 보냈던 'SUCCESS' 확인해보는 과정
+                    let response = request.responseText;
+                    if(response == 'SUCCESS') {
+                        cmmtList(); // 댓글 목록 갱신
+
+                        // 댓글 입력창 비우기
+                        $writer.value = '';
+                        $content.value = '';
+                    }
+                }
+            }
+        }
+
+        //
+        function event() {
+            
+            // 댓글 수정 버튼
+            let $btnUpdate = document.getElementsByClassName('btn-cmmt-update');
+        
+            // 댓글 수정 클릭 이벤트
+            for( let i=0; i < $btnUpdate.length; i++){
+                $btnUpdate[i].addEventListener('click', function() {
+                    // alert('수정버튼 클릭');
+
+                    // 해당 댓글의 작성자, 내용을 가져오기
+                    // $btnUpdate[i] : 현재요소 (수정버튼)
+                    
+                    let $top = $btnUpdate[i].parentNode.parentNode;
+                    let writer = $top.childNodes[1].textContent;
+                    let $inner = $top.parentNode;
+                    let content = $inner.childNodes[3].textContent;
+                    let $cmmtBox = $inner.parentNode
+
+                    let no = $btnUpdate[i].getAttribute('data'); // 댓글번호 가져옴
+                    //console.log(`작성자: ${writer}`);
+                    //console.log(`내용: ${content}`);
+
+                    // 댓글 수정 모드
+                    // 1. 기존 댓글 내용창 숨기기
+                    $inner.style.display = 'none';
+
+                    // 2. 수정 UI 출력
+                    let $editor = document.createElement('div');
+                    $editor.classList.add('inner');
+                    $editor.id = 'editor';
+
+                    let editor = ``;
+                    //editor += `<div class="inner" id="editor">`;
+                    editor += `<input type="text" placeholder="작성자" value="${writer}" id="update-writer"/>`;
+                    editor += `<br>`;
+                    editor += `<textarea cols="60" rows="5" id="update-content">${content}</textarea>`;
+                    editor += `<br>`;
+                    editor += `<button onclick="updateCmmt(${no})">수정</button>`;
+                    editor += `<button onclick="cancelCmmt()">취소</button>`;
+                    //editor += `</div>`;
+                    $editor.innerHTML = editor;
+                    $cmmtBox.appendChild($editor);
+                })
+            }
+        }
+
+        // 댓글 수정요청
+        function updateCmmt(no) {
+            // alert('수정 요청')
+            let writer = document.getElementById('update-writer').value;
+            let content = document.getElementById('update-content').value;
+
+            console.log(`수정한 댓글번호:  ${no}`);
+            console.log(`수정한 작성자:  ${writer}`);
+            console.log(`수정한 내용:  ${content}`);
+
+            let data = {
+                'cno'    : no,
+                'writer': writer,
+                'content': content
+            }
+
+            console.dir(data);
+            
+            // Ajax 비동기 요청
+            let request = new XMLHttpRequest();
+            request.open('PUT', '/cmmt');
+            request.setRequestHeader('Content-Type', 'application/json')
+            request.send(JSON.stringify(data))
+
+            // 요청 상태 체킹
+            request.onreadystatechange = function() {
+
+                // 요청 성공시,
+                if(request.readyState == request.DONE && request.status == 200) {
+                    console.log('댓글 수정 성공!');
+
+                    // alert(request.responseText); // 응답메시지로 보냈던 'SUCCESS' 확인해보는 과정
+                    let response = request.responseText;
+                    alert(response)
+                    if(response == 'SUCCESS') {
+                        console.log('success!!!!')
+                        cmmtList(); // 댓글 목록 갱신
+                    }
+                }
+            }
+        }
+        
+        // 댓글 수정 취소
+        function cancelCmmt() {
+            alert('취소 요청')
+            let $editor = document.getElementById('editor');
+            $editor.remove();
+
+            let $inner = document.getElementsByClassName('inner');
+            for(var i in $inner) {
+                $inner[i].style.display = 'block';
+            }
+
+            event()
+        }
+
+        // 댓글 수정요청
+        function deleteCmmt(no) {
+            // 삭제 요청
+            // Ajax 비동기 요청
+            let request = new XMLHttpRequest();
+            request.open('DELETE', '/cmmt/' + no);
+            request.send()
+
+            // 요청 상태 체킹
+            request.onreadystatechange = function() {
+
+                // 요청 성공시,
+                if(request.readyState == request.DONE && request.status == 200) {
+                    console.log('댓글 삭제 성공!');
+
+                    // alert(request.responseText); // 응답메시지로 보냈던 'SUCCESS' 확인해보는 과정
+                    let response = request.responseText;
+                    if(response == 'SUCCESS') {
+                        cmmtList(); // 댓글 목록 갱신
+                    }
                 }
             }
         }
