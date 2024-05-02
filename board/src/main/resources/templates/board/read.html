@@ -303,7 +303,7 @@
             console.log(`수정한 내용:  ${content}`);
 
             let data = {
-                'cno'    : no,
+                'cno'    : no,  // 'cNo' : no 라고 키값을 주면 매핑이 안되는 문제가 있어 'cno'로 설정함.
                 'writer': writer,
                 'content': content
             }
