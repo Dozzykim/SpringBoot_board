@@ -199,7 +199,12 @@ public class BoardController {
         return "redirect:/board/list";
     }
     
-    
+    /**
+     * 게시글 삭제 처리
+     * @param no
+     * @return
+     * @throws Exception
+     */
     @PostMapping("/delete")
     public String delete(@RequestParam("no") int no) throws Exception {
         

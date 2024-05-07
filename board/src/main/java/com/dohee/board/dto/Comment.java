@@ -15,5 +15,5 @@ public class Comment {
     private Date regDate;   // 등록일자
     private Date updDate;   // 수정일자
     
-    
+
 }

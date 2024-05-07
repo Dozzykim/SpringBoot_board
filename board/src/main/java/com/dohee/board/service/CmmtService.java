@@ -21,5 +21,14 @@ public interface CmmtService {
     // 댓글 삭제
     public int delete(int no) throws Exception;
 
+    // 댓글 종속 삭제 - 게시글 삭제와 연결(BoardServiceImpl.java)
+    public int deleteByBoardNo(int boardNo) throws Exception;
+
+    // 댓글번호 최댓값 가져오기
+    public int max() throws Exception;
+
+    // 대댓글 종속 삭제 - 댓글 삭제와 연결
+    public int deleteByParentNo(int parentNo) throws Exception;
+
 
 }

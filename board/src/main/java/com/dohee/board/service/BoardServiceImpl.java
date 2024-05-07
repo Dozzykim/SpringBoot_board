@@ -24,6 +24,9 @@ public class BoardServiceImpl implements BoardService {
     @Autowired
     private FileService fileService;
 
+    @Autowired
+    private CmmtService cmmtService;
+
     /**
      * 게시글 전체 조회
      */
@@ -127,6 +130,10 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public int delete(int no) throws Exception {
         int result = boardMapper.delete(no);
+
+        if (result > 0) {
+            result += cmmtService.deleteByBoardNo(no);
+        }
 
         return result;
     }

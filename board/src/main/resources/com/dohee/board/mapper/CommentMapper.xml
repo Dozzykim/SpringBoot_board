@@ -11,7 +11,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         SELECT *
         FROM comment
         WHERE board_no = #{boardNo}
-        ORDER BY reg_date ASC
+        ORDER BY parent_no ASC, reg_date ASC
     </select>
 
     <!-- 댓글 등록 -->
@@ -25,6 +25,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         UPDATE comment
         SET writer = #{writer}
         ,content = #{content}
+        <if test="parentNo !=0"> <!-- mysql 동적쿼리 사용함-->
+        <!-- 댓글 등록 시, 부모번호 세팅하기 위한 조건-->
+            ,parent_no = #{parentNo}
+        </if>
         ,upd_date = now()
         WHERE c_no = #{cNo}
     </update>
@@ -33,6 +37,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <delete id="delete">
         DELETE FROM comment
         WHERE c_no = #{no}
+    </delete>
+
+    <!-- 댓글 종속 삭제 -->
+    <delete id="deleteByBoardNo">
+        DELETE FROM comment
+        WHERE board_no = #{boardNo}
+    </delete>
+
+    <!-- 댓글 번호 최댓값 -->
+    <!-- LAST_INSERT_ID(): AI로 증가한 가장 마지막 번호-->
+    <select id="max" resultType="int">
+        SELECT MAX(c_no)
+        FROM comment
+    </select>
+
+    <!-- 답글 종속 삭제 -->
+    <delete id="deleteByParentNo">
+        DELETE FROM comment
+        WHERE parent_no = #{parentNo}
     </delete>
 
 </mapper>

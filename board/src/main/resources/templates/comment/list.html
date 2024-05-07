@@ -1,7 +1,11 @@
-
-
 <th:block th:each="cmmt : ${cmmtList}">
-    <div class="cmmt-box">
+    <!-- 댓글인 경우-->
+    <th:block th:if="${cmmt.cNo == cmmt.parentNo}"></th:block>
+        <div class="cmmt-box">
+    <!-- 답글인 경우-->
+    <th:block th:if="${cmmt.cNo != cmmt.parentNo}">
+        <div class="cmmt-box answer">
+    </th:block>
         <div class="inner">
             <div class="top">
                 <span class="cmmt-writer" th:text="${cmmt.writer}"></span>
@@ -12,7 +16,7 @@
                 </div>
             </div>
             <p class="cmmt-content" th:text="${cmmt.content}"></p>
-            <button class="btn-reply-content">답글</button>
+            <button class="btn-reply-content" th:onclick="|insertAnswer(this, ${cmmt.cNo})|">답글</button>
         </div>
     </div>
 </th:block>
